@@ -2,294 +2,473 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#6b1234" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Services" />
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon-180.png" />
 <title>Services</title>
 <style>
   :root{
-    --maroon-top:#8a2350;
-    --maroon-bottom:#6b1234;
-    --bg:#e9e7ec;
-    --card:#ffffff;
-    --ink:#1b1b1b;
-    --muted:#6c6c72;
-    --orange:#efab52;
-    --brand:#7a1a3f;
-    --magenta:#bd1a86;
-    --divider:#eceaef;
-    --nav-inactive:#7c7c82;
+    --maroon-top:#8a2350; --maroon-bottom:#6b1234;
+    --bg:#e9e7ec; --card:#fff; --ink:#1b1b1b; --muted:#6c6c72;
+    --orange:#efab52; --brand:#7a1a3f; --magenta:#bd1a86;
+    --divider:#eceaef; --nav-inactive:#7c7c82;
     --shadow:0 1px 3px rgba(0,0,0,.10);
+    --safe-top:env(safe-area-inset-top);
+    --safe-bot:env(safe-area-inset-bottom);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
-
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:#26262b;               /* dark backdrop only shows on wide screens */
-    display:flex;justify-content:center;
-    min-height:100vh;min-height:100dvh;
-  }
+  html,body{margin:0;padding:0;height:100%;background:var(--maroon-bottom);}
+  body{display:flex;justify-content:center;}
 
-  /* Phone frame — fills the screen on a real phone, centred on desktop */
   .phone{
-    width:100%;max-width:460px;
-    background:var(--bg);
-    min-height:100vh;min-height:100dvh;
-    display:flex;flex-direction:column;
-    position:relative;overflow:hidden;
+    width:100%;max-width:460px;height:100dvh;background:var(--bg);
+    display:flex;flex-direction:column;position:relative;overflow:hidden;
   }
 
-  /* ---------- Header ---------- */
-  .header{
-    background:linear-gradient(135deg,var(--maroon-top) 0%,var(--maroon-bottom) 70%);
-    color:#fff;
-    padding:0 20px 26px;
+  .screens{flex:1;position:relative;overflow:hidden;}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);}
+  .screen.active{display:flex;}
+  .screen.detail.active{animation:slidein .24s ease;}
+  @keyframes slidein{from{transform:translateX(22px);opacity:.4}to{transform:translateX(0);opacity:1}}
+  @media(prefers-reduced-motion:reduce){.screen.detail.active{animation:none;}}
+
+  .hdr{
+    background:linear-gradient(135deg,var(--maroon-top),var(--maroon-bottom) 72%);
+    color:#fff;padding:calc(var(--safe-top) + 8px) 18px 22px;flex:none;
     border-bottom-left-radius:22px;border-bottom-right-radius:22px;
   }
-  .statusbar{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:14px 4px 4px;font-size:17px;font-weight:600;
-  }
-  .statusbar .right{display:flex;align-items:center;gap:6px;}
-  .battery{
-    display:inline-flex;align-items:center;gap:2px;font-size:12px;font-weight:700;
-  }
-  .battery .shell{
-    border:1.6px solid rgba(255,255,255,.9);border-radius:4px;
-    padding:2px 4px;line-height:1;position:relative;
-  }
-  .battery .shell::after{
-    content:"";position:absolute;right:-4px;top:50%;transform:translateY(-50%);
-    width:2px;height:6px;background:rgba(255,255,255,.9);border-radius:0 1px 1px 0;
-  }
-  .brandrow{
-    display:flex;align-items:center;justify-content:space-between;margin-top:14px;
-  }
+  .hdr.sub{display:flex;align-items:center;gap:8px;padding-bottom:16px;}
+  .hdr.sub .back{background:none;border:none;color:#fff;padding:4px;display:flex;cursor:pointer;}
+  .hdr.sub .s-title{font-size:22px;font-weight:700;}
+  .brandrow{display:flex;align-items:center;justify-content:space-between;}
   .brand{display:flex;align-items:center;gap:12px;}
-  .crest{width:52px;height:52px;flex:none;}
-  .brand .txt{font-size:22px;font-weight:700;line-height:1.05;}
-  .gear{width:30px;height:30px;color:#fff;}
+  .crest{width:50px;height:50px;flex:none;}
+  .brand .txt{font-size:21px;font-weight:700;line-height:1.05;}
+  .gear{width:28px;height:28px;color:#fff;background:none;border:none;cursor:pointer;}
 
-  /* ---------- Body ---------- */
-  .body{padding:0 18px 96px;flex:1;overflow-y:auto;}
+  .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px 24px;}
+  .greeting{font-size:36px;font-weight:800;color:var(--ink);margin:24px 2px 18px;}
 
-  .greeting{font-size:38px;font-weight:800;color:var(--ink);margin:26px 2px 20px;}
-
-  /* Featured card (Driver Licence) */
   .featured{
-    background:var(--card);border-radius:16px;box-shadow:var(--shadow);
-    display:flex;align-items:center;overflow:hidden;height:78px;
+    background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:none;width:100%;
+    display:flex;align-items:center;overflow:hidden;height:76px;cursor:pointer;text-align:left;
   }
-  .featured .badge{
-    width:78px;height:78px;flex:none;background:var(--orange);
-    display:flex;align-items:center;justify-content:center;border-radius:14px 0 0 14px;
-  }
-  .featured .badge svg{width:44px;height:44px;color:#1b1b1b;}
-  .featured .label{flex:1;font-size:23px;font-weight:700;color:var(--ink);padding-left:20px;}
-  .featured .chev{padding-right:22px;color:#2b2b2b;}
+  .featured:active{transform:scale(.99);}
+  .featured .badge{width:76px;height:76px;flex:none;background:var(--orange);display:flex;align-items:center;justify-content:center;}
+  .featured .badge svg{width:42px;height:42px;color:#1b1b1b;}
+  .featured .label{flex:1;font-size:22px;font-weight:700;color:var(--ink);padding-left:18px;}
+  .featured .chev{padding-right:20px;color:#2b2b2b;}
 
-  .section-label{font-size:19px;font-weight:700;color:var(--muted);margin:30px 4px 12px;}
+  .section-label{font-size:18px;font-weight:700;color:var(--muted);margin:28px 4px 12px;}
 
-  /* Services list */
   .list{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;}
-  .row{
-    display:flex;align-items:center;gap:16px;padding:18px 18px;
-    border-bottom:1px solid var(--divider);
-  }
+  .row{display:flex;align-items:center;gap:15px;padding:17px 16px;border-bottom:1px solid var(--divider);background:none;border-left:none;border-right:none;border-top:none;width:100%;cursor:pointer;text-align:left;}
   .row:last-child{border-bottom:none;}
+  .row:active{background:#f5f3f6;}
   .row .ic{width:30px;flex:none;display:flex;justify-content:center;color:var(--brand);}
   .row .ic svg{width:26px;height:26px;}
-  .row .name{flex:1;font-size:20px;font-weight:700;color:var(--ink);}
+  .row .name{flex:1;font-size:19px;font-weight:700;color:var(--ink);}
   .row .ext{color:#1b1b1b;flex:none;}
-  .qld-badge{
-    background:var(--brand);color:#fff;font-size:11px;font-weight:800;
-    padding:3px 5px;border-radius:4px;letter-spacing:.3px;
-  }
+  .qld-badge{background:var(--brand);color:#fff;font-size:11px;font-weight:800;padding:3px 5px;border-radius:4px;}
 
-  /* Learn more — horizontal scroller */
-  .scroller{
-    display:flex;gap:16px;overflow-x:auto;padding:2px 0 4px;
-    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-  }
+  .scroller{display:flex;gap:15px;overflow-x:auto;padding:2px 0 4px;scroll-snap-type:x mandatory;}
   .scroller::-webkit-scrollbar{display:none;}
-  .learn-card{
-    flex:0 0 240px;scroll-snap-align:start;
-    background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
-    display:flex;flex-direction:column;
-  }
-  .learn-card .art{height:190px;display:flex;align-items:center;justify-content:center;}
-  .art.donate{background:var(--magenta);}
-  .art.flood{background:linear-gradient(160deg,#8fa9b8,#5c7a8c 60%,#43606f);}
-  .art.masters{background:linear-gradient(160deg,#c9d2d6,#93a4ac);}
-  .art .donate-logo{width:120px;height:120px;color:#fff;}
-  .learn-card .cap{
-    padding:16px 16px 18px;font-size:20px;font-weight:800;color:var(--ink);
-    line-height:1.2;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex:1;
-  }
-  .learn-card .cap .ext{flex:none;align-self:flex-end;color:#1b1b1b;}
+  .learn-card{flex:0 0 235px;scroll-snap-align:start;background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;border:none;cursor:pointer;text-align:left;}
+  .learn-card:active{transform:scale(.99);}
+  .learn-card .art{height:180px;display:flex;align-items:center;justify-content:center;}
+  .art.donate{background:var(--magenta);} .art.flood{background:linear-gradient(160deg,#8fa9b8,#5c7a8c 60%,#43606f);} .art.masters{background:linear-gradient(160deg,#c9d2d6,#93a4ac);}
+  .art .donate-logo{width:115px;height:115px;}
+  .learn-card .cap{padding:15px 15px 17px;font-size:19px;font-weight:800;color:var(--ink);line-height:1.2;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex:1;}
+  .view-all{display:flex;align-items:center;justify-content:center;gap:8px;margin:20px 0 4px;font-size:18px;font-weight:800;letter-spacing:.5px;color:var(--ink);background:none;border:none;width:100%;cursor:pointer;}
 
-  .view-all{
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    margin:22px 0 4px;font-size:19px;font-weight:800;letter-spacing:.5px;color:var(--ink);
-  }
-
-  /* ---------- Bottom nav ---------- */
-  .tabbar{
-    position:sticky;bottom:0;left:0;right:0;
-    background:#fff;border-top:1px solid #e2e0e5;
-    display:flex;justify-content:space-around;align-items:flex-end;
-    padding:8px 4px calc(8px + env(safe-area-inset-bottom));
-  }
-  .tab{
-    display:flex;flex-direction:column;align-items:center;gap:5px;
-    font-size:13px;font-weight:600;color:var(--nav-inactive);flex:1;
-  }
-  .tab svg{width:26px;height:26px;}
+  .tabbar{flex:none;background:#fff;border-top:1px solid #e2e0e5;display:flex;justify-content:space-around;padding:8px 4px calc(8px + var(--safe-bot));}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--nav-inactive);flex:1;background:none;border:none;cursor:pointer;}
+  .tab svg{width:25px;height:25px;}
   .tab.active{color:var(--brand);}
 
-  @media(min-width:461px){
-    .phone{margin:0;box-shadow:0 20px 60px rgba(0,0,0,.4);}
-  }
+  .pad{padding:20px 18px 30px;}
+  .panel{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px;}
+  .panel h3{margin:0 0 6px;font-size:19px;}
+  .panel p{margin:6px 0;color:#33333a;line-height:1.5;font-size:15px;}
+  .field{width:100%;padding:14px;font-size:17px;border:1.5px solid #d6d3da;border-radius:12px;margin:8px 0 4px;background:#fff;}
+  .btn{width:100%;padding:15px;font-size:17px;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:12px;cursor:pointer;margin-top:12px;}
+  .btn:active{opacity:.85;}
+  .btn.sec{background:#fff;color:var(--brand);border:1.5px solid var(--brand);}
+  .kv{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--divider);font-size:15px;}
+  .kv:last-child{border-bottom:none;} .kv .k{color:var(--muted);} .kv .v{font-weight:700;color:var(--ink);text-align:right;}
+  .pill{display:inline-block;padding:5px 12px;border-radius:20px;font-size:13px;font-weight:800;}
+  .pill.ok{background:#e2f3e6;color:#1c7a37;} .pill.warn{background:#fdeede;color:#a5641a;}
+  .hidden{display:none;}
+  .note{font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5;}
+
+  .licence-wrap{padding:18px;}
+  .licence{background:linear-gradient(150deg,#8a2350,#5e1030);color:#fff;border-radius:18px;padding:20px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(94,16,48,.35);}
+  .licence::before{content:"";position:absolute;top:-40%;left:-30%;width:80%;height:180%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);transform:rotate(18deg);animation:shine 4.5s linear infinite;}
+  @keyframes shine{0%{left:-40%}100%{left:120%}}
+  @media(prefers-reduced-motion:reduce){.licence::before{animation:none;}}
+  .lic-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;letter-spacing:.5px;opacity:.9;}
+  .lic-mid{display:flex;gap:16px;margin:16px 0;}
+  .photo{width:92px;height:116px;border-radius:10px;background:#d8c3cd;flex:none;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;}
+  .photo svg{width:78px;height:88px;color:#8a6d7a;}
+  .lic-name{font-size:24px;font-weight:800;line-height:1.1;}
+  .lic-sub{font-size:13px;opacity:.85;margin-top:2px;}
+  .lic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-top:6px;font-size:13px;}
+  .lic-grid .lab{opacity:.7;font-size:11px;text-transform:uppercase;letter-spacing:.4px;}
+  .lic-grid .val{font-weight:700;font-size:15px;}
+  .sample-ribbon{position:absolute;top:14px;right:-34px;background:rgba(255,255,255,.9);color:#7a1a3f;font-weight:900;font-size:12px;letter-spacing:2px;padding:4px 40px;transform:rotate(45deg);}
+  .refresh{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);justify-content:center;margin-top:14px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:#1c7a37;animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .qr-screen{align-items:center;justify-content:center;text-align:center;}
+  #qr{width:250px;height:250px;background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow);}
+  .viewfinder{width:280px;height:280px;border-radius:20px;background:#111;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+  .viewfinder video{width:100%;height:100%;object-fit:cover;}
+  .frame{position:absolute;inset:36px;border-radius:14px;box-shadow:0 0 0 3px rgba(255,255,255,.85) inset;}
+  .scanline{position:absolute;left:40px;right:40px;height:2px;background:#5fd08a;box-shadow:0 0 12px #5fd08a;animation:scan 2.4s ease-in-out infinite;}
+  @keyframes scan{0%,100%{top:44px}50%{top:236px}}
+
+  .msg{display:flex;gap:12px;padding:16px 14px;border-bottom:1px solid var(--divider);background:none;border-top:none;border-left:none;border-right:none;width:100%;text-align:left;cursor:pointer;}
+  .msg:active{background:#f5f3f6;}
+  .msg .avatar{width:42px;height:42px;border-radius:10px;background:var(--brand);color:#fff;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+  .msg .mtitle{font-weight:700;font-size:16px;color:var(--ink);}
+  .msg .mprev{font-size:14px;color:var(--muted);margin-top:2px;}
+  .msg .mtime{font-size:12px;color:var(--muted);margin-left:auto;flex:none;}
+  .unread{width:9px;height:9px;border-radius:50%;background:var(--brand);flex:none;align-self:center;}
 </style>
 </head>
 <body>
 <div class="phone">
+  <div class="screens">
 
-  <!-- ===== Header ===== -->
-  <header class="header">
-    <div class="statusbar">
-      <span>1:30</span>
-      <span class="right">
-        <!-- silent bell -->
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
-        <!-- signal -->
-        <svg width="18" height="14" viewBox="0 0 20 16" fill="#fff"><rect x="0" y="10" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="9" rx="1"/><rect x="10" y="4" width="3" height="12" rx="1" opacity=".4"/><rect x="15" y="1" width="3" height="15" rx="1" opacity=".4"/></svg>
-        <span style="font-weight:700;">5G</span>
-        <span class="battery"><span class="shell">87</span></span>
-      </span>
-    </div>
-
-    <div class="brandrow">
-      <div class="brand">
-        <!-- Stylised crest placeholder (NOT the official coat of arms) -->
-        <svg class="crest" viewBox="0 0 60 60" fill="none">
-          <path d="M30 4C20 8 12 9 8 9c0 22 4 36 22 47 18-11 22-25 22-47-4 0-12-1-22-5Z" fill="#fff" opacity=".14"/>
-          <path d="M30 8C22 11 15 12 11 12c0 19 4 31 19 41 15-10 19-22 19-41-4 0-11-1-19-4Z" stroke="#fff" stroke-width="2"/>
-          <circle cx="30" cy="26" r="7" stroke="#fff" stroke-width="2"/>
-          <path d="M23 40c2-5 5-7 7-7s5 2 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-          <path d="M18 20l4 3M42 20l-4 3" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <div class="txt">Queensland<br>Government</div>
-      </div>
-      <!-- gear -->
-      <svg class="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-    </div>
-  </header>
-
-  <!-- ===== Body ===== -->
-  <main class="body">
-    <h1 class="greeting">Good afternoon</h1>
-
-    <!-- Featured -->
-    <button class="featured" style="border:none;width:100%;cursor:pointer;text-align:left;">
-      <span class="badge">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11m-14 0h14m-14 0a2 2 0 0 0-2 2v3h2m14-5a2 2 0 0 1 2 2v3h-2M5 16v2H4v-2m1 0h14m0 0v2h1v-2M7.5 16a1.5 1.5 0 1 0 0-.01M18 16a1.5 1.5 0 1 0 0-.01"/></svg>
-      </span>
-      <span class="label">Driver Licence</span>
-      <span class="chev">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
-      </span>
-    </button>
-
-    <div class="section-label">Services</div>
-
-    <div class="list">
-      <div class="row">
-        <span class="ic"><span class="qld-badge">QLD</span></span>
-        <span class="name">Check registration status</span>
-        <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
-      </div>
-      <div class="row">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 6.5c0-2-2.2-3-5-3s-5 1-5 3.5S9 10 12 10.5s5 1.5 5 4-2.2 3.5-5 3.5-5-1-5-3"/></svg></span>
-        <span class="name">Renew registration</span>
-        <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
-      </div>
-      <div class="row">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 13-8.5 8.5a2.1 2.1 0 0 1-3-3L11 10"/><path d="m16 11 5-5"/><path d="m9 5 5 5"/><path d="m13 1 9 9"/><path d="m8 6 4-4"/></svg></span>
-        <span class="name">Pay a fine</span>
-        <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
-      </div>
-      <div class="row">
-        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
-        <span class="name">Find a Customer Service Centre</span>
-        <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
-      </div>
-    </div>
-
-    <div class="section-label">Learn more about</div>
-
-    <div class="scroller">
-      <div class="learn-card">
-        <div class="art donate">
-          <svg class="donate-logo" viewBox="0 0 120 120" fill="none">
-            <path d="M60 78s-22-12-22-30a13 13 0 0 1 22-9 13 13 0 0 1 22 9c0 18-22 30-22 30Z" fill="#fff"/>
-            <path d="M30 44a32 32 0 0 1 52-16" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
-            <path d="M90 76a32 32 0 0 1-52 16" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
-            <path d="M84 20l2 11-11 1z" fill="#fff"/>
-            <path d="M36 100l-2-11 11-1z" fill="#fff"/>
+  <section class="screen active" id="s-home">
+    <header class="hdr">
+      <div class="brandrow">
+        <div class="brand">
+          <svg class="crest" viewBox="0 0 60 60" fill="none">
+            <path d="M30 8C22 11 15 12 11 12c0 19 4 31 19 41 15-10 19-22 19-41-4 0-11-1-19-4Z" stroke="#fff" stroke-width="2"/>
+            <circle cx="30" cy="26" r="7" stroke="#fff" stroke-width="2"/>
+            <path d="M23 40c2-5 5-7 7-7s5 2 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
           </svg>
+          <div class="txt">Queensland<br>Government</div>
         </div>
-        <div class="cap"><span>Register as an organ and tissue donor today</span>
-          <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
-        </div>
+        <button class="gear" onclick="openDetail('s-settings')" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="body">
+      <h1 class="greeting">Good afternoon</h1>
+      <button class="featured" onclick="openDetail('s-licence')">
+        <span class="badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11H5Zm0 0a2 2 0 0 0-2 2v3h2m14-5a2 2 0 0 1 2 2v3h-2M7.5 15.5a1.5 1.5 0 1 0 0 .01M18 15.5a1.5 1.5 0 1 0 0 .01"/></svg></span>
+        <span class="label">Driver Licence</span>
+        <span class="chev"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span>
+      </button>
+
+      <div class="section-label">Services</div>
+      <div class="list">
+        <button class="row" onclick="openDetail('s-checkrego')"><span class="ic"><span class="qld-badge">QLD</span></span><span class="name">Check registration status</span><span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span></button>
+        <button class="row" onclick="openDetail('s-renew')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 6.5c0-2-2.2-3-5-3s-5 1-5 3.5S9 10 12 10.5s5 1.5 5 4-2.2 3.5-5 3.5-5-1-5-3"/></svg></span><span class="name">Renew registration</span><span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span></button>
+        <button class="row" onclick="openDetail('s-fine')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 13-8.5 8.5a2.1 2.1 0 0 1-3-3L11 10"/><path d="m16 11 5-5"/><path d="m9 5 5 5"/><path d="m13 1 9 9"/></svg></span><span class="name">Pay a fine</span><span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span></button>
+        <button class="row" onclick="openDetail('s-csc')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="name">Find a Customer Service Centre</span><span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span></button>
       </div>
 
-      <div class="learn-card">
-        <div class="art flood"></div>
-        <div class="cap"><span>Disaster recovery support</span>
-          <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
-        </div>
+      <div class="section-label">Learn more about</div>
+      <div class="scroller">
+        <button class="learn-card" onclick="openDetail('s-organ')">
+          <div class="art donate"><svg class="donate-logo" viewBox="0 0 120 120" fill="none"><path d="M60 78s-22-12-22-30a13 13 0 0 1 22-9 13 13 0 0 1 22 9c0 18-22 30-22 30Z" fill="#fff"/><path d="M30 44a32 32 0 0 1 52-16" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M90 76a32 32 0 0 1-52 16" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M84 20l2 11-11 1z" fill="#fff"/><path d="M36 100l-2-11 11-1z" fill="#fff"/></svg></div>
+          <div class="cap"><span>Register as an organ and tissue donor today</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+        </button>
+        <button class="learn-card" onclick="openDetail('s-disaster')"><div class="art flood"></div><div class="cap"><span>Disaster recovery support</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div></button>
+        <button class="learn-card" onclick="openDetail('s-moto')"><div class="art masters"></div><div class="cap"><span>Motorcycle safety</span></div></button>
       </div>
+      <button class="view-all">VIEW ALL <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></button>
+    </div>
+  </section>
 
-      <div class="learn-card">
-        <div class="art masters"></div>
-        <div class="cap"><span>Motorcycle safety</span></div>
+  <section class="screen detail" id="s-licence">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Driver Licence</span></header>
+    <div class="body">
+      <div class="licence-wrap">
+        <div class="licence">
+          <div class="sample-ribbon">SAMPLE</div>
+          <div class="lic-top"><span>QUEENSLAND DRIVER LICENCE</span><span>AUS</span></div>
+          <div class="lic-mid">
+            <div class="photo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5 0-9 2.6-9 6v2h18v-2c0-3.4-4-6-9-6Z"/></svg></div>
+            <div>
+              <div class="lic-name">WILLIAM<br>SAMPLE</div>
+              <div class="lic-sub">12 Example St<br>Capalaba QLD 4157</div>
+            </div>
+          </div>
+          <div class="lic-grid">
+            <div><div class="lab">Licence no.</div><div class="val">SPECIMEN</div></div>
+            <div><div class="lab">Class</div><div class="val">C &middot; Open</div></div>
+            <div><div class="lab">Date of birth</div><div class="val">14 Mar 1998</div></div>
+            <div><div class="lab">Expiry</div><div class="val">14 Mar 2031</div></div>
+          </div>
+        </div>
+        <div class="refresh"><span class="dot"></span><span id="lic-refresh">Last refreshed just now</span></div>
+        <button class="btn sec" onclick="setTab('s-showqr')" style="margin-top:16px;">Show QR code</button>
+        <p class="note">This is a sample licence for educational use only. It is not a real or valid licence and cannot be used for identification.</p>
       </div>
     </div>
+  </section>
 
-    <div class="view-all">VIEW ALL
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+  <section class="screen detail" id="s-checkrego">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Check registration</span></header>
+    <div class="body"><div class="pad">
+      <div class="panel">
+        <h3>Registration status</h3>
+        <p>Enter a Queensland plate number to check its status.</p>
+        <input class="field" id="plate" placeholder="e.g. 123ABC" value="123ABC" />
+        <button class="btn" onclick="checkRego()">Check status</button>
+      </div>
+      <div class="panel hidden" id="rego-result">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h3 style="margin:0;">123ABC</h3><span class="pill ok">Registered</span></div>
+        <div class="kv"><span class="k">Vehicle</span><span class="v">2019 Toyota Corolla</span></div>
+        <div class="kv"><span class="k">Expiry date</span><span class="v">30 Sep 2026</span></div>
+        <div class="kv"><span class="k">CTP insurer</span><span class="v">Suncorp</span></div>
+        <div class="kv"><span class="k">Status</span><span class="v">Current</span></div>
+      </div>
+      <p class="note">Sample data — not connected to any real registration records.</p>
+    </div></div>
+  </section>
+
+  <section class="screen detail" id="s-renew">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Renew registration</span></header>
+    <div class="body"><div class="pad">
+      <div class="panel" id="renew-summary">
+        <h3>123ABC — 2019 Toyota Corolla</h3>
+        <div class="kv"><span class="k">Registration period</span><span class="v">6 months</span></div>
+        <div class="kv"><span class="k">Registration fee</span><span class="v">$185.90</span></div>
+        <div class="kv"><span class="k">CTP insurance</span><span class="v">$179.65</span></div>
+        <div class="kv"><span class="k">Traffic improvement fee</span><span class="v">$52.10</span></div>
+        <div class="kv"><span class="k">Total</span><span class="v">$417.65</span></div>
+        <button class="btn" onclick="pay('renew-summary','renew-done')">Pay $417.65</button>
+      </div>
+      <div class="panel hidden" id="renew-done" style="text-align:center;">
+        <div style="font-size:52px;">✅</div>
+        <h3>Registration renewed</h3>
+        <p>Your registration is paid until <b>31 Mar 2027</b>. A receipt has been sent to your Messages.</p>
+        <button class="btn sec" onclick="goBack()">Done</button>
+      </div>
+      <p class="note">Sample checkout — no payment is taken.</p>
+    </div></div>
+  </section>
+
+  <section class="screen detail" id="s-fine">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Pay a fine</span></header>
+    <div class="body"><div class="pad">
+      <div class="panel" id="fine-lookup">
+        <h3>Find your fine</h3>
+        <p>Enter the reference number from your infringement notice.</p>
+        <input class="field" id="fineref" placeholder="Reference number" value="QP-4471-8823" />
+        <button class="btn" onclick="findFine()">Find fine</button>
+      </div>
+      <div class="panel hidden" id="fine-detail">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h3 style="margin:0;">Infringement</h3><span class="pill warn">Unpaid</span></div>
+        <div class="kv"><span class="k">Reference</span><span class="v">QP-4471-8823</span></div>
+        <div class="kv"><span class="k">Offence</span><span class="v">Exceed speed limit ≤13km/h</span></div>
+        <div class="kv"><span class="k">Date</span><span class="v">02 Aug 2026</span></div>
+        <div class="kv"><span class="k">Amount due</span><span class="v">$322.00</span></div>
+        <button class="btn" onclick="pay('fine-detail','fine-done')">Pay $322.00</button>
+      </div>
+      <div class="panel hidden" id="fine-done" style="text-align:center;">
+        <div style="font-size:52px;">✅</div>
+        <h3>Fine paid</h3>
+        <p>Payment of <b>$322.00</b> received. A receipt is in your Messages.</p>
+        <button class="btn sec" onclick="goBack()">Done</button>
+      </div>
+      <p class="note">Sample data — no real fine and no payment is taken.</p>
+    </div></div>
+  </section>
+
+  <section class="screen detail" id="s-csc">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Customer Service Centres</span></header>
+    <div class="body"><div class="pad">
+      <div style="height:150px;border-radius:16px;background:linear-gradient(160deg,#cfe0d6,#a9c6b6);box-shadow:var(--shadow);margin-bottom:16px;display:flex;align-items:center;justify-content:center;color:#4b6b58;font-weight:700;">🗺️ Map</div>
+      <div class="list">
+        <div class="row" style="cursor:default;"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="name" style="font-weight:600;font-size:16px;">Capalaba TMR<br><span style="color:var(--muted);font-size:13px;">45 Redland Bay Rd &middot; 2.1 km</span></span></div>
+        <div class="row" style="cursor:default;"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="name" style="font-weight:600;font-size:16px;">Cleveland CSC<br><span style="color:var(--muted);font-size:13px;">Bloomfield St &middot; 6.4 km</span></span></div>
+        <div class="row" style="cursor:default;"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="name" style="font-weight:600;font-size:16px;">Wynnum CSC<br><span style="color:var(--muted);font-size:13px;">Florence St &middot; 9.0 km</span></span></div>
+      </div>
+      <p class="note">Sample locations for demonstration.</p>
+    </div></div>
+  </section>
+
+  <section class="screen detail" id="s-organ">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Organ donation</span></header>
+    <div class="body">
+      <div class="art donate" style="height:180px;display:flex;align-items:center;justify-content:center;"><svg class="donate-logo" viewBox="0 0 120 120" fill="none"><path d="M60 78s-22-12-22-30a13 13 0 0 1 22-9 13 13 0 0 1 22 9c0 18-22 30-22 30Z" fill="#fff"/></svg></div>
+      <div class="pad">
+        <h3 style="margin-top:0;">Register as an organ and tissue donor</h3>
+        <p style="line-height:1.6;color:#33333a;">One donor can transform the lives of many people. Registering your decision takes about a minute and lets your family know your wishes.</p>
+        <p style="line-height:1.6;color:#33333a;">You can register or update your decision at any time.</p>
+        <button class="btn" onclick="toast('Sample link — opens DonateLife in the real app')">Register now</button>
+      </div>
     </div>
-  </main>
+  </section>
+  <section class="screen detail" id="s-disaster">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Disaster recovery</span></header>
+    <div class="body">
+      <div class="art flood" style="height:180px;"></div>
+      <div class="pad">
+        <h3 style="margin-top:0;">Disaster recovery support</h3>
+        <p style="line-height:1.6;color:#33333a;">Find grants, financial assistance and practical help available to Queenslanders recovering from floods, cyclones and bushfires.</p>
+        <button class="btn" onclick="toast('Sample link')">View support options</button>
+      </div>
+    </div>
+  </section>
+  <section class="screen detail" id="s-moto">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Motorcycle safety</span></header>
+    <div class="body">
+      <div class="art masters" style="height:180px;"></div>
+      <div class="pad">
+        <h3 style="margin-top:0;">Motorcycle safety</h3>
+        <p style="line-height:1.6;color:#33333a;">Tips, training and rider resources to help you stay safe on Queensland roads.</p>
+        <button class="btn" onclick="toast('Sample link')">Learn more</button>
+      </div>
+    </div>
+  </section>
 
-  <!-- ===== Bottom nav ===== -->
+  <section class="screen detail" id="s-settings">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Settings</span></header>
+    <div class="body"><div class="pad"><div class="list">
+      <div class="row" style="cursor:default;"><span class="name">Account</span></div>
+      <div class="row" style="cursor:default;"><span class="name">Notifications</span></div>
+      <div class="row" style="cursor:default;"><span class="name">Security &amp; PIN</span></div>
+      <div class="row" style="cursor:default;"><span class="name">About this app</span></div>
+    </div><p class="note">Sample settings screen.</p></div></div>
+  </section>
+
+  <section class="screen" id="s-wallet">
+    <header class="hdr sub"><span class="s-title" style="margin-left:4px;">Wallet</span></header>
+    <div class="body"><div class="pad">
+      <div class="list">
+        <button class="row" onclick="openDetail('s-licence')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M13 9h5M13 13h5"/></svg></span><span class="name">Driver Licence</span><span class="ext"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7b3bb" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span></button>
+        <button class="row" onclick="toast('Sample card')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/></svg></span><span class="name">Photo Identification</span><span class="ext"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7b3bb" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span></button>
+        <button class="row" onclick="toast('Sample card')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/></svg></span><span class="name">Recreational Marine Licence</span><span class="ext"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7b3bb" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span></button>
+      </div>
+      <p class="note">Sample wallet — cards are for demonstration only.</p>
+    </div></div>
+  </section>
+
+  <section class="screen" id="s-showqr">
+    <header class="hdr sub"><span class="s-title" style="margin-left:4px;">Show QR</span></header>
+    <div class="body qr-screen"><div class="pad" style="display:flex;flex-direction:column;align-items:center;">
+      <p style="color:var(--muted);margin-bottom:18px;">Have this scanned to share your details</p>
+      <canvas id="qr" width="250" height="250"></canvas>
+      <p style="margin-top:18px;font-weight:700;">WILLIAM SAMPLE</p>
+      <p style="color:var(--muted);font-size:13px;">Code refreshes every 60 seconds</p>
+      <p class="note">Sample QR — encodes demo text only.</p>
+    </div></div>
+  </section>
+
+  <section class="screen" id="s-scanqr">
+    <header class="hdr sub"><span class="s-title" style="margin-left:4px;">Scan QR</span></header>
+    <div class="body" style="align-items:center;"><div class="pad" style="display:flex;flex-direction:column;align-items:center;">
+      <p style="color:var(--muted);margin-bottom:18px;text-align:center;">Point your camera at a QR code to check in</p>
+      <div class="viewfinder"><video id="cam" playsinline muted></video><div class="frame"></div><div class="scanline"></div></div>
+      <button class="btn" style="max-width:280px;" onclick="enableCam()">Enable camera</button>
+      <p class="note" id="cam-note">Camera works when hosted over https (like GitHub Pages).</p>
+    </div></div>
+  </section>
+
+  <section class="screen" id="s-messages">
+    <header class="hdr sub"><span class="s-title" style="margin-left:4px;">Messages</span></header>
+    <div class="body">
+      <button class="msg" onclick="openDetail('s-msg1')"><div class="avatar">TMR</div><div><div class="mtitle">Registration renewal due</div><div class="mprev">Your registration for 123ABC expires soon…</div></div><div class="mtime">2h</div><div class="unread"></div></button>
+      <button class="msg" onclick="openDetail('s-msg2')"><div class="avatar">QLD</div><div><div class="mtitle">Digital licence updated</div><div class="mprev">Your digital driver licence has been refreshed.</div></div><div class="mtime">1d</div></button>
+      <button class="msg" onclick="openDetail('s-msg3')"><div class="avatar">QLD</div><div><div class="mtitle">Welcome to the app</div><div class="mprev">Thanks for setting up your account.</div></div><div class="mtime">3d</div></button>
+    </div>
+  </section>
+  <section class="screen detail" id="s-msg1">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Message</span></header>
+    <div class="body"><div class="pad"><h3 style="margin-top:0;">Registration renewal due</h3><p style="color:var(--muted);font-size:13px;">Transport and Main Roads · 2 hours ago</p><p style="line-height:1.6;">Your vehicle registration for <b>123ABC</b> is due to expire on <b>30 Sep 2026</b>. You can renew it now from the home screen.</p><button class="btn" onclick="setTab('s-home');openDetail('s-renew')">Renew now</button></div></div>
+  </section>
+  <section class="screen detail" id="s-msg2">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Message</span></header>
+    <div class="body"><div class="pad"><h3 style="margin-top:0;">Digital licence updated</h3><p style="color:var(--muted);font-size:13px;">Queensland Government · 1 day ago</p><p style="line-height:1.6;">Your digital driver licence has been refreshed with the latest details.</p></div></div>
+  </section>
+  <section class="screen detail" id="s-msg3">
+    <header class="hdr sub"><button class="back" onclick="goBack()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><span class="s-title">Message</span></header>
+    <div class="body"><div class="pad"><h3 style="margin-top:0;">Welcome to the app</h3><p style="color:var(--muted);font-size:13px;">Queensland Government · 3 days ago</p><p style="line-height:1.6;">Thanks for setting up your account. You can add your licences to your wallet and access services from the home screen.</p></div></div>
+  </section>
+
+  </div>
+
   <nav class="tabbar">
-    <div class="tab active">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>
-      Home
-    </div>
-    <div class="tab">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2.5"/><path d="M2 10h20"/><circle cx="17.5" cy="14.5" r="1.2" fill="currentColor"/></svg>
-      Wallet
-    </div>
-    <div class="tab">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3zM5 5v3h3V5zM14 3h7v7h-7zM16 5v3h3V5zM3 14h7v7H3zM5 16v3h3v-3zM14 14h3v3h-3zM18 14h3v3h-3zM18 18h3v3h-3zM14 18h3v3h-3z"/></svg>
-      Show QR
-    </div>
-    <div class="tab">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
-      Scan QR
-    </div>
-    <div class="tab">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-      Messages
-    </div>
+    <button class="tab active" id="t-home" onclick="setTab('s-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>Home</button>
+    <button class="tab" id="t-wallet" onclick="setTab('s-wallet')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2.5"/><path d="M2 10h20"/><circle cx="17.5" cy="14.5" r="1.2" fill="currentColor"/></svg>Wallet</button>
+    <button class="tab" id="t-showqr" onclick="setTab('s-showqr')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3zM5 5v3h3V5zM14 3h7v7h-7zM16 5v3h3V5zM3 14h7v7H3zM5 16v3h3v-3zM14 14h3v3h-3zM18 14h3v3h-3zM18 18h3v3h-3zM14 18h3v3h-3z"/></svg>Show QR</button>
+    <button class="tab" id="t-scanqr" onclick="setTab('s-scanqr')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>Scan QR</button>
+    <button class="tab" id="t-messages" onclick="setTab('s-messages')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Messages</button>
   </nav>
 
+  <div id="toast" style="position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1b1b1b;color:#fff;padding:12px 20px;border-radius:24px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:50;"></div>
 </div>
+
+<script>
+  var base='s-home';
+  var tabFor={'s-home':'t-home','s-wallet':'t-wallet','s-showqr':'t-showqr','s-scanqr':'t-scanqr','s-messages':'t-messages'};
+
+  function showOnly(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+    document.getElementById(id).classList.add('active');
+    var b=document.querySelector('#'+id+' .body'); if(b) b.scrollTop=0;
+  }
+  function setTab(id){
+    base=id; showOnly(id);
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+    if(tabFor[id]) document.getElementById(tabFor[id]).classList.add('active');
+    if(id==='s-showqr') drawQR();
+  }
+  function openDetail(id){ showOnly(id); }
+  function goBack(){ showOnly(base); }
+
+  function checkRego(){ document.getElementById('rego-result').classList.remove('hidden'); }
+  function findFine(){ document.getElementById('fine-detail').classList.remove('hidden'); }
+  function pay(hideId,showId){ document.getElementById(hideId).classList.add('hidden'); document.getElementById(showId).classList.remove('hidden'); }
+
+  var toastTimer;
+  function toast(msg){
+    var t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1';
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.style.opacity='0';},1900);
+  }
+
+  function drawQR(){
+    var c=document.getElementById('qr'); if(!c)return; var ctx=c.getContext('2d');
+    var N=25, cell=c.width/N; ctx.clearRect(0,0,c.width,c.height);
+    var seed=Date.now()%100000; function rnd(){seed=(seed*9301+49297)%233280;return seed/233280;}
+    ctx.fillStyle='#111';
+    for(var y=0;y<N;y++)for(var x=0;x<N;x++){ if(rnd()>0.55) ctx.fillRect(x*cell,y*cell,cell,cell); }
+    function finder(fx,fy){ ctx.fillStyle='#111';ctx.fillRect(fx*cell,fy*cell,7*cell,7*cell);
+      ctx.fillStyle='#fff';ctx.fillRect((fx+1)*cell,(fy+1)*cell,5*cell,5*cell);
+      ctx.fillStyle='#111';ctx.fillRect((fx+2)*cell,(fy+2)*cell,3*cell,3*cell); }
+    finder(0,0);finder(N-7,0);finder(0,N-7);
+  }
+  setInterval(function(){ if(document.getElementById('s-showqr').classList.contains('active')) drawQR(); },60000);
+
+  async function enableCam(){
+    var note=document.getElementById('cam-note');
+    try{
+      var stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+      var v=document.getElementById('cam'); v.srcObject=stream; await v.play();
+      note.textContent='Camera active — this demo does not read codes.';
+    }catch(e){ note.textContent='Camera unavailable (needs https and permission).'; }
+  }
+
+  setInterval(function(){
+    var el=document.getElementById('lic-refresh'); if(!el)return;
+    var t=new Date(); var h=t.getHours()%12||12; var m=('0'+t.getMinutes()).slice(-2);
+    var ap=t.getHours()<12?'am':'pm';
+    el.textContent='Last refreshed '+h+':'+m+' '+ap;
+  },1000);
+</script>
 </body>
 </html>
