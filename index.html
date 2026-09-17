@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#6b1234" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Services" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<title>Services</title>
+<style>
+  :root{
+    --maroon-top:#8a2350;
+    --maroon-bottom:#6b1234;
+    --bg:#e9e7ec;
+    --card:#ffffff;
+    --ink:#1b1b1b;
+    --muted:#6c6c72;
+    --orange:#efab52;
+    --brand:#7a1a3f;
+    --magenta:#bd1a86;
+    --divider:#eceaef;
+    --nav-inactive:#7c7c82;
+    --shadow:0 1px 3px rgba(0,0,0,.10);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#26262b;               /* dark backdrop only shows on wide screens */
+    display:flex;justify-content:center;
+    min-height:100vh;min-height:100dvh;
+  }
+
+  /* Phone frame — fills the screen on a real phone, centred on desktop */
+  .phone{
+    width:100%;max-width:460px;
+    background:var(--bg);
+    min-height:100vh;min-height:100dvh;
+    display:flex;flex-direction:column;
+    position:relative;overflow:hidden;
+  }
+
+  /* ---------- Header ---------- */
+  .header{
+    background:linear-gradient(135deg,var(--maroon-top) 0%,var(--maroon-bottom) 70%);
+    color:#fff;
+    padding:0 20px 26px;
+    border-bottom-left-radius:22px;border-bottom-right-radius:22px;
+  }
+  .statusbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 4px 4px;font-size:17px;font-weight:600;
+  }
+  .statusbar .right{display:flex;align-items:center;gap:6px;}
+  .battery{
+    display:inline-flex;align-items:center;gap:2px;font-size:12px;font-weight:700;
+  }
+  .battery .shell{
+    border:1.6px solid rgba(255,255,255,.9);border-radius:4px;
+    padding:2px 4px;line-height:1;position:relative;
+  }
+  .battery .shell::after{
+    content:"";position:absolute;right:-4px;top:50%;transform:translateY(-50%);
+    width:2px;height:6px;background:rgba(255,255,255,.9);border-radius:0 1px 1px 0;
+  }
+  .brandrow{
+    display:flex;align-items:center;justify-content:space-between;margin-top:14px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .crest{width:52px;height:52px;flex:none;}
+  .brand .txt{font-size:22px;font-weight:700;line-height:1.05;}
+  .gear{width:30px;height:30px;color:#fff;}
+
+  /* ---------- Body ---------- */
+  .body{padding:0 18px 96px;flex:1;overflow-y:auto;}
+
+  .greeting{font-size:38px;font-weight:800;color:var(--ink);margin:26px 2px 20px;}
+
+  /* Featured card (Driver Licence) */
+  .featured{
+    background:var(--card);border-radius:16px;box-shadow:var(--shadow);
+    display:flex;align-items:center;overflow:hidden;height:78px;
+  }
+  .featured .badge{
+    width:78px;height:78px;flex:none;background:var(--orange);
+    display:flex;align-items:center;justify-content:center;border-radius:14px 0 0 14px;
+  }
+  .featured .badge svg{width:44px;height:44px;color:#1b1b1b;}
+  .featured .label{flex:1;font-size:23px;font-weight:700;color:var(--ink);padding-left:20px;}
+  .featured .chev{padding-right:22px;color:#2b2b2b;}
+
+  .section-label{font-size:19px;font-weight:700;color:var(--muted);margin:30px 4px 12px;}
+
+  /* Services list */
+  .list{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;}
+  .row{
+    display:flex;align-items:center;gap:16px;padding:18px 18px;
+    border-bottom:1px solid var(--divider);
+  }
+  .row:last-child{border-bottom:none;}
+  .row .ic{width:30px;flex:none;display:flex;justify-content:center;color:var(--brand);}
+  .row .ic svg{width:26px;height:26px;}
+  .row .name{flex:1;font-size:20px;font-weight:700;color:var(--ink);}
+  .row .ext{color:#1b1b1b;flex:none;}
+  .qld-badge{
+    background:var(--brand);color:#fff;font-size:11px;font-weight:800;
+    padding:3px 5px;border-radius:4px;letter-spacing:.3px;
+  }
+
+  /* Learn more — horizontal scroller */
+  .scroller{
+    display:flex;gap:16px;overflow-x:auto;padding:2px 0 4px;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  }
+  .scroller::-webkit-scrollbar{display:none;}
+  .learn-card{
+    flex:0 0 240px;scroll-snap-align:start;
+    background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .learn-card .art{height:190px;display:flex;align-items:center;justify-content:center;}
+  .art.donate{background:var(--magenta);}
+  .art.flood{background:linear-gradient(160deg,#8fa9b8,#5c7a8c 60%,#43606f);}
+  .art.masters{background:linear-gradient(160deg,#c9d2d6,#93a4ac);}
+  .art .donate-logo{width:120px;height:120px;color:#fff;}
+  .learn-card .cap{
+    padding:16px 16px 18px;font-size:20px;font-weight:800;color:var(--ink);
+    line-height:1.2;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex:1;
+  }
+  .learn-card .cap .ext{flex:none;align-self:flex-end;color:#1b1b1b;}
+
+  .view-all{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin:22px 0 4px;font-size:19px;font-weight:800;letter-spacing:.5px;color:var(--ink);
+  }
+
+  /* ---------- Bottom nav ---------- */
+  .tabbar{
+    position:sticky;bottom:0;left:0;right:0;
+    background:#fff;border-top:1px solid #e2e0e5;
+    display:flex;justify-content:space-around;align-items:flex-end;
+    padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+  }
+  .tab{
+    display:flex;flex-direction:column;align-items:center;gap:5px;
+    font-size:13px;font-weight:600;color:var(--nav-inactive);flex:1;
+  }
+  .tab svg{width:26px;height:26px;}
+  .tab.active{color:var(--brand);}
+
+  @media(min-width:461px){
+    .phone{margin:0;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <div class="statusbar">
+      <span>1:30</span>
+      <span class="right">
+        <!-- silent bell -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+        <!-- signal -->
+        <svg width="18" height="14" viewBox="0 0 20 16" fill="#fff"><rect x="0" y="10" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="9" rx="1"/><rect x="10" y="4" width="3" height="12" rx="1" opacity=".4"/><rect x="15" y="1" width="3" height="15" rx="1" opacity=".4"/></svg>
+        <span style="font-weight:700;">5G</span>
+        <span class="battery"><span class="shell">87</span></span>
+      </span>
+    </div>
+
+    <div class="brandrow">
+      <div class="brand">
+        <!-- Stylised crest placeholder (NOT the official coat of arms) -->
+        <svg class="crest" viewBox="0 0 60 60" fill="none">
+          <path d="M30 4C20 8 12 9 8 9c0 22 4 36 22 47 18-11 22-25 22-47-4 0-12-1-22-5Z" fill="#fff" opacity=".14"/>
+          <path d="M30 8C22 11 15 12 11 12c0 19 4 31 19 41 15-10 19-22 19-41-4 0-11-1-19-4Z" stroke="#fff" stroke-width="2"/>
+          <circle cx="30" cy="26" r="7" stroke="#fff" stroke-width="2"/>
+          <path d="M23 40c2-5 5-7 7-7s5 2 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M18 20l4 3M42 20l-4 3" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="txt">Queensland<br>Government</div>
+      </div>
+      <!-- gear -->
+      <svg class="gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+    </div>
+  </header>
+
+  <!-- ===== Body ===== -->
+  <main class="body">
+    <h1 class="greeting">Good afternoon</h1>
+
+    <!-- Featured -->
+    <button class="featured" style="border:none;width:100%;cursor:pointer;text-align:left;">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11m-14 0h14m-14 0a2 2 0 0 0-2 2v3h2m14-5a2 2 0 0 1 2 2v3h-2M5 16v2H4v-2m1 0h14m0 0v2h1v-2M7.5 16a1.5 1.5 0 1 0 0-.01M18 16a1.5 1.5 0 1 0 0-.01"/></svg>
+      </span>
+      <span class="label">Driver Licence</span>
+      <span class="chev">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+      </span>
+    </button>
+
+    <div class="section-label">Services</div>
+
+    <div class="list">
+      <div class="row">
+        <span class="ic"><span class="qld-badge">QLD</span></span>
+        <span class="name">Check registration status</span>
+        <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+      </div>
+      <div class="row">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 6.5c0-2-2.2-3-5-3s-5 1-5 3.5S9 10 12 10.5s5 1.5 5 4-2.2 3.5-5 3.5-5-1-5-3"/></svg></span>
+        <span class="name">Renew registration</span>
+        <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+      </div>
+      <div class="row">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 13-8.5 8.5a2.1 2.1 0 0 1-3-3L11 10"/><path d="m16 11 5-5"/><path d="m9 5 5 5"/><path d="m13 1 9 9"/><path d="m8 6 4-4"/></svg></span>
+        <span class="name">Pay a fine</span>
+        <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+      </div>
+      <div class="row">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+        <span class="name">Find a Customer Service Centre</span>
+        <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+      </div>
+    </div>
+
+    <div class="section-label">Learn more about</div>
+
+    <div class="scroller">
+      <div class="learn-card">
+        <div class="art donate">
+          <svg class="donate-logo" viewBox="0 0 120 120" fill="none">
+            <path d="M60 78s-22-12-22-30a13 13 0 0 1 22-9 13 13 0 0 1 22 9c0 18-22 30-22 30Z" fill="#fff"/>
+            <path d="M30 44a32 32 0 0 1 52-16" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M90 76a32 32 0 0 1-52 16" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M84 20l2 11-11 1z" fill="#fff"/>
+            <path d="M36 100l-2-11 11-1z" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="cap"><span>Register as an organ and tissue donor today</span>
+          <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+        </div>
+      </div>
+
+      <div class="learn-card">
+        <div class="art flood"></div>
+        <div class="cap"><span>Disaster recovery support</span>
+          <span class="ext"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>
+        </div>
+      </div>
+
+      <div class="learn-card">
+        <div class="art masters"></div>
+        <div class="cap"><span>Motorcycle safety</span></div>
+      </div>
+    </div>
+
+    <div class="view-all">VIEW ALL
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+    </div>
+  </main>
+
+  <!-- ===== Bottom nav ===== -->
+  <nav class="tabbar">
+    <div class="tab active">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>
+      Home
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2.5"/><path d="M2 10h20"/><circle cx="17.5" cy="14.5" r="1.2" fill="currentColor"/></svg>
+      Wallet
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3zM5 5v3h3V5zM14 3h7v7h-7zM16 5v3h3V5zM3 14h7v7H3zM5 16v3h3v-3zM14 14h3v3h-3zM18 14h3v3h-3zM18 18h3v3h-3zM14 18h3v3h-3z"/></svg>
+      Show QR
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+      Scan QR
+    </div>
+    <div class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      Messages
+    </div>
+  </nav>
+
+</div>
+</body>
+</html>
